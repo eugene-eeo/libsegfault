@@ -30,18 +30,18 @@ void array_free(array *a) {
 int array_resize(array *a, unsigned long new_size) {
 	if (a->N == NULL) {
 		a->N = calloc(new_size, sizeof(int));
+		if (a->N == NULL)
+			return 0;
 	} else {
 		// realloc and fill memory with zeroes
 		int *ptr = realloc(a->N, new_size * sizeof(int));
-		if (ptr != NULL) {
-			a->N = ptr;
-			if (new_size > a->size)
-				for (unsigned long i = 0; i < new_size - a->size; i++)
-					ptr[a->size + i] = 0;
-		}
+		if (ptr == NULL)
+			return 0;
+		a->N = ptr;
+		if (new_size > a->size)
+			for (unsigned long i = 0; i < new_size - a->size; i++)
+				ptr[a->size + i] = 0;
 	}
-	if (a->N == NULL)
-		return 0;
 	a->size = new_size;
 	return 1;
 }
