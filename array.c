@@ -32,10 +32,13 @@ int array_resize(array *a, unsigned long new_size) {
 		a->N = calloc(new_size, sizeof(int));
 	} else {
 		// realloc and fill memory with zeroes
-		a->N = realloc(a->N, new_size * sizeof(int));
-		if (a->N != NULL && new_size > a->size)
-			for (unsigned long i = 0; i < new_size - a->size; i++)
-				a->N[a->size + i] = 0;
+		int *ptr = realloc(a->N, new_size * sizeof(int));
+		if (ptr != NULL) {
+			a->N = ptr;
+			if (new_size > a->size)
+				for (unsigned long i = 0; i < new_size - a->size; i++)
+					ptr[a->size + i] = 0;
+		}
 	}
 	if (a->N == NULL)
 		return 0;
