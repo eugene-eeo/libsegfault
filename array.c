@@ -37,8 +37,10 @@ int array_resize(array *a, unsigned long new_size) {
 			for (unsigned long i = 0; i < new_size - a->size; i++)
 				a->N[a->size + i] = 0;
 	}
+	if (a->N == NULL)
+		return 0;
 	a->size = new_size;
-	return a->N == NULL;
+	return 1;
 }
 
 /*
@@ -46,7 +48,7 @@ int array_resize(array *a, unsigned long new_size) {
  * neccessary. Return 0 => resize failed.
  */
 int array_set(array *a, int idx, int val) {
-	if ((unsigned long) idx >= a->size)
+	while ((unsigned long) idx >= a->size)
 		if (!array_resize(a, a->size*2))
 			return 0;
 	a->N[idx] = val;

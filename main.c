@@ -27,5 +27,9 @@ int main() {
 		assert(v == i);
 	}
 
+	assert(array_set(&a, 100, 69));
+	assert(array_get(&a, 100, &v));
+	assert(v == 69);
+
 	array_free(&a);
 }
