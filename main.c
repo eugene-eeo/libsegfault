@@ -51,6 +51,8 @@ void test_hashmap() {
 
 	for (int i = 0; i < 25; i++) {
 		int v;
+		// check that we cannot get a deleted item
+		assert(!hashmap_get(&h, 2*i, &v));
 		assert(hashmap_get(&h, 2*i+1, &v));
 		assert(v == 2*i+1);
 	}

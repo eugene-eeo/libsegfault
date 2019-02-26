@@ -9,7 +9,7 @@ typedef enum {
 
 
 typedef struct {
-	int state;
+	state s;
 	int k;
 	int v;
 } entry;
@@ -37,13 +37,13 @@ hashmap hashmap_new() {
 int hashmap_delete(hashmap *h, int k) {
 	int i = 0;
 	int p = hash(k);
-	entry curr;
+	entry *curr;
 	while (i < h->size) {
-		curr = h->entries[p % h->size];
-		if (curr.state == EMPTY)
+		curr = &h->entries[p % h->size];
+		if (curr->s == EMPTY)
 			return 0;
-		if (curr.state == USED && curr.k == k) {
-			curr.state = TOMBSTONE;
+		if (curr->s == USED && curr->k == k) {
+			curr->s = TOMBSTONE;
 			return 1;
 		}
 		p++;
@@ -59,9 +59,9 @@ int hashmap_get(hashmap *h, int k, int *v) {
 	entry curr;
 	while (i < h->size) {
 		curr = h->entries[p % h->size];
-		if (curr.state == EMPTY)
+		if (curr.s == EMPTY)
 			return 0;
-		if (curr.k == k) {
+		if (curr.s == USED && curr.k == k) {
 			*v = curr.v;
 			return 1;
 		}
@@ -79,8 +79,8 @@ int hashmap_put_raw(int size, entry *E, int k, int v) {
 	while (i < size) {
 		curr = &E[p % size];
 		// include TOMBSTONE and EMPTY
-		if (curr->state != USED || curr->k == k) {
-			curr->state = USED;
+		if (curr->s != USED || curr->k == k) {
+			curr->s = USED;
 			curr->k = k;
 			curr->v = v;
 			return 1;
@@ -106,7 +106,7 @@ int hashmap_grow(hashmap *h) {
 	// be zeroed out anyways. (calloc)
 	// rehash
 	for (i = 0; i < h->size; i++)
-		if (h->entries[i].state == USED)
+		if (h->entries[i].s == USED)
 			hashmap_put_raw(size, entries, h->entries[i].k, h->entries[i].v);
 	h->size = size;
 	h->entries = entries;
