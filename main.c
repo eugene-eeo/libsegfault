@@ -57,7 +57,13 @@ void test_hashmap() {
 		assert(v == 2*i+1);
 	}
 
+	cursor c = cursor_create(&h);
+	entry *e;
+	while ((e = cursor_next(&c)) != NULL)
+		assert(e->k % 2 == 1);
+
 	hashmap_free(&h);
+	assert(cursor_next(&c) == NULL);
 }
 
 void test_array() {

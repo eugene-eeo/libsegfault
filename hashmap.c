@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdlib.h>
 
 
@@ -6,6 +7,7 @@ typedef enum {
 	USED,
 	TOMBSTONE,
 } state;
+
 
 
 typedef struct {
@@ -19,6 +21,13 @@ typedef struct {
 	entry *entries;
 	int size;
 } hashmap;
+
+
+typedef struct {
+	int i;
+	entry *entries;
+	hashmap *h;
+} cursor;
 
 
 int hash(int x) {
@@ -94,10 +103,7 @@ int hashmap_put_raw(int size, entry *E, int k, int v) {
 
 int hashmap_grow(hashmap *h) {
 	int i;
-	int size = h->size * 2;
-	if (h->entries == NULL) {
-		size = 16;
-	}
+	int size = h->entries == NULL ? 16 : h->size * 2;
 	entry *entries = calloc(size, sizeof(entry));
 	if (entries == NULL)
 		return 0;
@@ -108,6 +114,7 @@ int hashmap_grow(hashmap *h) {
 	for (i = 0; i < h->size; i++)
 		if (h->entries[i].s == USED)
 			hashmap_put_raw(size, entries, h->entries[i].k, h->entries[i].v);
+	free(h->entries);
 	h->size = size;
 	h->entries = entries;
 	return 1;
@@ -126,4 +133,34 @@ void hashmap_free(hashmap *h) {
 		free(h->entries);
 	h->entries = NULL;
 	h->size = 0;
+}
+
+
+cursor cursor_create(hashmap *h) {
+	cursor c;
+	c.entries = h->entries;
+	c.h = h;
+	c.i = 0;
+	return c;
+}
+
+
+entry* cursor_next(cursor *c) {
+	// ensure that we are still looking at data that isn't freed
+	if (c->entries != c->h->entries)
+		return NULL;
+	entry *e;
+	while (c->i >= c->h->size) {
+		e = &c->h->entries[c->i];
+		c->i++;
+		if (e->s == USED)
+			return e;
+	}
+	return NULL;
+}
+
+
+void cursor_free(cursor *c) {
+	c->entries = NULL;
+	c->i = -1;
 }
