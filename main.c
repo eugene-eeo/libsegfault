@@ -2,6 +2,36 @@
 #include <assert.h>
 #include "array.c"
 #include "hashmap.c"
+#include "disjoint_set.c"
+
+void test_dset() {
+	dset *a = dset_new();
+	dset *b = dset_new();
+	dset *c = dset_new();
+	dset *d = dset_new();
+
+	assert(dset_find(a) == a);
+	assert(dset_find(b) == b);
+	assert(dset_find(c) == c);
+	assert(dset_find(d) == d);
+
+	dset_union(a, b);
+	dset_union(c, d);
+
+	assert(dset_find(a) == dset_find(b));
+	assert(dset_find(c) == dset_find(d));
+	assert(dset_find(a) != dset_find(c));
+
+	dset_union(a, c);
+	assert(dset_find(a) == dset_find(b));
+	assert(dset_find(a) == dset_find(c));
+	assert(dset_find(a) == dset_find(d));
+
+	free(a);
+	free(b);
+	free(c);
+	free(d);
+}
 
 void test_hashmap() {
 	hashmap h = hashmap_new();
@@ -63,4 +93,5 @@ void test_array() {
 int main() {
 	test_array();
 	test_hashmap();
+	test_dset();
 }
