@@ -128,9 +128,9 @@ int hashmap_put(hashmap *h, int k, int v) {
 	return 1;
 }
 
+
 void hashmap_free(hashmap *h) {
-	if (h->entries != NULL)
-		free(h->entries);
+	free(h->entries);
 	h->entries = NULL;
 	h->size = 0;
 }
@@ -146,16 +146,15 @@ cursor cursor_create(hashmap *h) {
 
 
 entry* cursor_next(cursor *c) {
-	// ensure that we are still looking at data that isn't freed
-	if (c->entries != c->h->entries)
-		return NULL;
 	entry *e;
-	while (c->i >= c->h->size) {
-		e = &c->h->entries[c->i];
-		c->i++;
-		if (e->s == USED)
-			return e;
-	}
+	// ensure that we are still looking at data that isn't freed
+	if (c->entries == c->h->entries)
+		while (c->i >= c->h->size) {
+			e = &c->h->entries[c->i];
+			c->i++;
+			if (e->s == USED)
+				return e;
+		}
 	return NULL;
 }
 
