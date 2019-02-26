@@ -102,6 +102,9 @@ int hashmap_grow(hashmap *h) {
 	entry *entries = calloc(size, sizeof(entry));
 	if (entries == NULL)
 		return 0;
+	// By choice of EMPTY = 0, we don't need to initialize
+	// this piece of memory because all the entries would
+	// be zeroed out anyways. (calloc)
 	// rehash
 	for (i = 0; i < h->size; i++)
 		if (h->entries[i].state == USED)
@@ -117,4 +120,11 @@ int hashmap_put(hashmap *h, int k, int v) {
 		if (!hashmap_grow(h))
 			return 0;
 	return 1;
+}
+
+void hashmap_free(hashmap *h) {
+	if (h->entries != NULL)
+		free(h->entries);
+	h->entries = NULL;
+	h->size = 0;
 }

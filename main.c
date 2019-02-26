@@ -24,6 +24,8 @@ void test_hashmap() {
 		assert(hashmap_get(&h, 2*i+1, &v));
 		assert(v == 2*i+1);
 	}
+
+	hashmap_free(&h);
 }
 
 void test_array() {
