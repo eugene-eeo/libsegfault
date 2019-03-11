@@ -3,6 +3,34 @@
 #include "array.c"
 #include "hashmap.c"
 #include "disjoint_set.c"
+#include "rc4.c"
+#include <string.h>
+
+void test_rc4() {
+	char *k = "Key";
+	char *m = "Plaintext";
+	char *c = malloc(strlen(m) + 1);
+	char *b = malloc(strlen(m) + 1);
+
+	assert(c != NULL);
+	assert(b != NULL);
+
+	rc4_encrypt(k, m, c);
+	rc4_decrypt(k, c, b);
+
+	assert(c[0] == '\xBB');
+	assert(c[1] == '\xF3');
+	assert(c[2] == '\x16');
+	assert(c[3] == '\xE8');
+	assert(c[4] == '\xD9');
+	assert(c[5] == '\x40');
+	assert(c[6] == '\xAF');
+	assert(c[7] == '\x0A');
+	assert(c[8] == '\xD3');
+
+	assert(strlen(c) == strlen(m));
+	assert(strcmp(b, m) == 0);
+}
 
 void test_dset() {
 	dset *a = dset_new();
@@ -102,4 +130,5 @@ int main() {
 	test_array();
 	test_hashmap();
 	test_dset();
+	test_rc4();
 }
