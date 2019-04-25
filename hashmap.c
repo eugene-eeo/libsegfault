@@ -1,29 +1,27 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
-typedef enum {
+typedef enum state {
 	EMPTY = 0,
 	USED,
 	TOMBSTONE,
 } state;
 
 
-
-typedef struct {
+typedef struct entry {
 	state s;
 	int k;
 	int v;
 } entry;
 
 
-typedef struct {
+typedef struct hashmap {
 	entry *entries;
 	int size;
 } hashmap;
 
 
-typedef struct {
+typedef struct cursor {
 	int i;
 	entry *entries;
 	hashmap *h;
@@ -63,10 +61,10 @@ int hashmap_delete(hashmap *h, int k) {
 
 
 int hashmap_get(hashmap *h, int k, int *v) {
-	int i = 0;
+	int n = 0;
 	int p = hash(k);
 	entry curr;
-	while (i < h->size) {
+	while (n < h->size) {
 		curr = h->entries[p % h->size];
 		if (curr.s == EMPTY)
 			return 0;
@@ -75,17 +73,17 @@ int hashmap_get(hashmap *h, int k, int *v) {
 			return 1;
 		}
 		p++;
-		i++;
+		n++;
 	}
 	return 0;
 }
 
 
-int hashmap_put_raw(int size, entry *E, int k, int v) {
-	int i = 0;
+int put_raw_entry(int size, entry *E, int k, int v) {
+	int n = 0;
 	int p = hash(k);
 	entry *curr;
-	while (i < size) {
+	while (n < size) {
 		curr = &E[p % size];
 		// include TOMBSTONE and EMPTY
 		if (curr->s != USED || curr->k == k) {
@@ -95,7 +93,7 @@ int hashmap_put_raw(int size, entry *E, int k, int v) {
 			return 1;
 		}
 		p++;
-		i++;
+		n++;
 	}
 	return 0;
 }
@@ -113,7 +111,7 @@ int hashmap_grow(hashmap *h) {
 	// rehash
 	for (i = 0; i < h->size; i++)
 		if (h->entries[i].s == USED)
-			hashmap_put_raw(size, entries, h->entries[i].k, h->entries[i].v);
+			put_raw_entry(size, entries, h->entries[i].k, h->entries[i].v);
 	free(h->entries);
 	h->size = size;
 	h->entries = entries;
@@ -122,7 +120,7 @@ int hashmap_grow(hashmap *h) {
 
 
 int hashmap_put(hashmap *h, int k, int v) {
-	while (!hashmap_put_raw(h->size, h->entries, k, v))
+	while (!put_raw_entry(h->size, h->entries, k, v))
 		if (!hashmap_grow(h))
 			return 0;
 	return 1;
@@ -148,7 +146,7 @@ cursor cursor_create(hashmap *h) {
 entry* cursor_next(cursor *c) {
 	entry *e;
 	// ensure that we are still looking at data that isn't freed
-	if (c->entries == c->h->entries)
+	if (c->entries != NULL && c->entries == c->h->entries)
 		while (c->i >= c->h->size) {
 			e = &c->h->entries[c->i];
 			c->i++;
