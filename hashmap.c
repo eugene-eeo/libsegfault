@@ -147,7 +147,7 @@ entry* cursor_next(cursor *c) {
 	entry *e;
 	// ensure that we are still looking at data that isn't freed
 	if (c->entries != NULL && c->entries == c->h->entries)
-		while (c->i >= c->h->size) {
+		while (c->i < c->h->size) {
 			e = &c->h->entries[c->i];
 			c->i++;
 			if (e->s == USED)
